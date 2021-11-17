@@ -3,10 +3,10 @@ from time import time
 import logging
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui, QtWidgets
-from InheritItemTest import MyItem
-from MyQTextEdit import MyQTextEdit
+from MyItem import MyItem
 from IoProcess import IoProcess
 from config import columnDict
+import FontStyle
 
 
 # 备份！
@@ -39,9 +39,13 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
 
-        self.Button_Add = QtWidgets.QPushButton(self.centralwidget)
-        self.Button_Add.setObjectName("Button_Add")
-        self.horizontalLayout.addWidget(self.Button_Add)
+        self.Button_AddChild = QtWidgets.QPushButton(self.centralwidget)
+        self.Button_AddChild.setObjectName("Button_AddChild")
+        self.horizontalLayout.addWidget(self.Button_AddChild)
+
+        self.Button_AddBro = QtWidgets.QPushButton(self.centralwidget)
+        self.Button_AddBro.setObjectName("Button_AddBro")
+        self.horizontalLayout.addWidget(self.Button_AddBro)
 
         self.Button_Delete = QtWidgets.QPushButton(self.centralwidget)
         self.Button_Delete.setObjectName("Button_Delete")
@@ -71,7 +75,6 @@ class Ui_MainWindow(object):
         self.Button_CollapseAll.setObjectName("Button_CollapseAll")
         self.horizontalLayout.addWidget(self.Button_CollapseAll)
 
-
         # 水平布局2
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
@@ -91,6 +94,8 @@ class Ui_MainWindow(object):
         # self.root = QtWidgets.QTreeWidgetItem(self.treeWidget)
         self.root = MyItem(self.treeWidget)
         self.selectedItem = self.root
+        # self.root.setFont(0, FontStyle.fontTitle0)
+        self.root.setFontTitle()
         # self.selectedItem = self.treeWidget.currentItem()
 
         self.io = IoProcess(self.root)
@@ -144,14 +149,16 @@ class Ui_MainWindow(object):
 
         self.treeWidget.setSortingEnabled(__sortingEnabled)
         # 按钮名称及快捷键
-        self.Button_Add.setText(_translate("MainWindow", "+"))
-        self.Button_Add.setShortcut('alt+n')
+        self.Button_AddChild.setText(_translate("MainWindow", "+"))
+        self.Button_AddChild.setShortcut('ctrl+n')
+        self.Button_AddBro.setText(_translate("MainWindow", "├"))
+        self.Button_AddBro.setShortcut('enter')
         self.Button_Delete.setText(_translate("MainWindow", "-"))
         self.Button_Delete.setShortcut('delete')
         self.Button_MoveLeft.setText(_translate("MainWindow", "←"))
         self.Button_MoveLeft.setShortcut('shift+left')
         self.Button_MoveRight.setText(_translate("MainWindow", "→"))
-        self.Button_MoveRight.setShortcut('shift+right ')
+        self.Button_MoveRight.setShortcut('shift+right')
         self.Button_MoveUp.setText(_translate("MainWindow", "↑"))
         self.Button_MoveUp.setShortcut('shift+up')
         self.Button_MoveDown.setText(_translate("MainWindow", "↓"))
@@ -159,7 +166,6 @@ class Ui_MainWindow(object):
         self.Button_ExpandAll.setText(_translate("MainWindow", "Expand All"))
         self.Button_CollapseAll.setText(_translate("MainWindow", "Fold All"))
         # 按层级折叠: todo
-
 
         self.file.setTitle(_translate("MainWindow", "文件"))
         self.about.setTitle(_translate("MainWindow", "关于"))
@@ -170,7 +176,8 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def addSlot(self):
-        self.Button_Add.clicked.connect(self.addButtonClicked)
+        self.Button_AddChild.clicked.connect(self.addChildButtonClicked)
+        self.Button_AddBro.clicked.connect(self.addBroButtonClicked)
         self.Button_Delete.clicked.connect(self.deleteButtonClicked)
         self.Button_MoveLeft.clicked.connect(self.moveLeftButtonClicked)
         self.Button_MoveRight.clicked.connect(self.moveRightButtonClicked)
@@ -202,7 +209,7 @@ class Ui_MainWindow(object):
         #         # self.selectedItem.takeChildren()
         #     ))
 
-    def addButtonClicked(self):
+    def addChildButtonClicked(self):
         self.itemCount += 1
         # child = QTreeWidgetItem(self.selectedItem)
         child = MyItem(self.selectedItem)
@@ -220,8 +227,35 @@ class Ui_MainWindow(object):
         # 子可输入
         child.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsSelectable)
 
-        # todo： 默认可输入状态
         child.setText(columnDict['block'], '分块{}'.format(self.itemCount))
+        child.setFontTitle()
+        # 默认可输入状态
+        # self.treeWidget.editItem(child)
+        logging.debug('set new child text')
+
+        # 为当前节点和父节点增加计数
+        # 从第二列取
+        # 当前节点更新计数
+
+    def addBroButtonClicked(self):
+        self.itemCount += 1
+        parent = self.selectedItem.parent()
+        item = MyItem(self.selectedItem)
+        currentIndex = parent.indexOfChild(self.selectedItem)
+        item = self.selectedItem.takeChild(self.selectedItem.indexOfChild(item))
+        parent.insertChild(currentIndex + 1, item)
+        self.selectedItem.setSelected(0)
+        self.selectedItem = item
+        self.selectedItem.setSelected(1)
+        logging.info('addBroButtonClicked')
+        # 默认展开
+        self.selectedItem.setExpanded(1)
+        # 子可输入
+        item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsSelectable)
+        item.setText(columnDict['block'], '分块{}'.format(self.itemCount))
+        item.setFontTitle()
+        # 默认可输入状态
+        # self.treeWidget.editItem(child)
         logging.debug('set new child text')
 
         # 为当前节点和父节点增加计数
@@ -246,6 +280,7 @@ class Ui_MainWindow(object):
         if currentParent == self.root:
             pass
         else:
+            isExpanded = self.selectedItem.isExpanded()
             # take
             currentIndex = currentParent.indexOfChild(self.selectedItem)
             item = currentParent.takeChild(currentIndex)
@@ -253,11 +288,15 @@ class Ui_MainWindow(object):
             objectParent = currentParent.parent()
             objectIndex = objectParent.indexOfChild(currentParent)
             objectParent.insertChild(objectIndex, item)
+            self.selectedItem.setSelected(False)
+            self.selectedItem = item
+            item.setExpanded(isExpanded)
+            item.setSelected(True)
         return
 
     def moveRightButtonClicked(self):
         # 将节点及子节点降低一个层级，置于同级的下一个节点下
-        # 要求：1 有同级下一个节点
+        # 要求：有同级下一个节点
         logging.info('moveRightButtonClicked')
         currentParent = self.selectedItem.parent()
         currentIndex = currentParent.indexOfChild(self.selectedItem)
@@ -265,54 +304,64 @@ class Ui_MainWindow(object):
         if currentIndex == -1:
             pass
         else:
+            isExpanded = self.selectedItem.isExpanded()
+            # 通过迭代器拿到下一个节点
+            itemNext = self.selectedItem.nextSameLevelItem()
             # take
-            # 暂时无法通过迭代器拿到下一个节点 todo
-            # itemNext = QTreeWidgetItemIterator(self.selectedItem)
             item = currentParent.takeChild(currentIndex)
             # inset 到 同级下一个节点 所在 list 首位
-            itemNext = currentParent.takeChild((currentIndex))
             itemNext.insertChild(0, item)
             # 挂回，保持展开
             currentParent.insertChild(currentIndex, itemNext)
+            self.selectedItem = item
             itemNext.setExpanded(True)
+            itemNext.setSelected(False)
+            item.setSelected(True)
+            item.setExpanded(isExpanded)
         return
 
     def moveUpButtonClicked(self):
         # 将节点及子节点向上移动
         # take children
         parent = self.selectedItem.parent()
-        index = parent.indexOfChild(self.selectedItem)
+        currentIndex = parent.indexOfChild(self.selectedItem)
         isExpanded = self.selectedItem.isExpanded()
-        if index == 0:
+        if currentIndex == 0:
             pass
         else:
-            childList = parent.takeChildren()
-            item = childList.pop(index)
-            childList.insert(index - 1, item)
-            parent.addChildren(childList)
-        # 保持选中状态
-        self.selectedItem.setSelected(1)
-        # 保持折叠/非折叠状态
-        self.selectedItem.setExpanded(isExpanded)
+            # take
+            item = parent.takeChild(currentIndex)
+            # insert
+            parent.insertChild(currentIndex - 1, item)
+            self.selectedItem.setSelected(0)
+            self.selectedItem = item
+            # 保持选中状态
+            self.selectedItem.setSelected(1)
+            # 保持折叠/非折叠状态
+            self.selectedItem.setExpanded(isExpanded)
+            self.root.setSelected(0)
         return
 
     def moveDownButtonClicked(self):
         # 将节点及子节点向下移动
         # take children
         parent = self.selectedItem.parent()
-        index = parent.indexOfChild(self.selectedItem)
+        currentIndex = parent.indexOfChild(self.selectedItem)
         isExpanded = self.selectedItem.isExpanded()
-        if index == -1:
+        if currentIndex == -1:
             pass
         else:
-            childList = parent.takeChildren()
-            item = childList.pop(index)
-            childList.insert(index + 1, item)
-            parent.addChildren(childList)
-        # 保持选中状态
-        self.selectedItem.setSelected(1)
-        # 保持折叠/非折叠状态
-        self.selectedItem.setExpanded(isExpanded)
+            # take
+            item = parent.takeChild(currentIndex)
+            # insert
+            parent.insertChild(currentIndex + 1, item)
+            # todo: F2 与 selectedItem 同步
+            self.selectedItem.setSelected(0)
+            self.selectedItem = item
+            # 保持选中状态
+            self.selectedItem.setSelected(1)
+            # 保持折叠/非折叠状态
+            self.selectedItem.setExpanded(isExpanded)
         return
 
     def expandAllButtonClicked(self):

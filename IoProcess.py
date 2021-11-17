@@ -2,7 +2,7 @@ import xml.etree.cElementTree as ET
 import xml.dom.minidom
 import logging
 import time
-from InheritItemTest import MyItem
+from MyItem import MyItem
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 from config import *
