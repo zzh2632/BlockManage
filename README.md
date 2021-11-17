@@ -1,8 +1,6 @@
 # 工具目的
 对文档/知识 按分块进行管理，组织为知识树，便于进行文档的编写和重构
 
-![image.png](http://pfp.ps.netease.com/kmpvt/file/6194b060935599b17f07c3b67mOU5yI601?sign=tgGoKpun2aR2SquuHcWsvb_fdCg=&expire=1637152446)
-
 # 功能
 - 树状结构，支持基本的结构操作：
     - 创建子节点：Alt+n
@@ -41,3 +39,4 @@
 
 # 待修复问题
 - 对根节点操作的 crash
+- 左右层级移动，节点折叠
