@@ -22,6 +22,7 @@
 <https://github.com/zzh2632/BlockManage/tree/main/dist>
 
 # 开发计划
+- 仿 Markdown 格式层级字体和大小
 - 创建同级兄弟节点：Enter
 - 切换到节点属性：Tab
 - 分块待处理标签
