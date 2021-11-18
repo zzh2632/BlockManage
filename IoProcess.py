@@ -147,6 +147,7 @@ class IoProcess(object):
         childItem.setText(columnDict['remark'], remark)
         childItem.setText(columnDict['link'], link)
         childItem.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsSelectable)
+        childItem.setFontTitle()
 
         if remark == "√":
             childItem.isItemComplete = True
