@@ -25,14 +25,16 @@ class Ui_MainWindow(object):
         self.MainWindow = MainWindow
         self.itemCount = 0
 
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+        self.MainWindow.setObjectName("MainWindow")
+        self.MainWindow.resize(800, 600)
         # MainWindow.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint) # 窗口置顶
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
 
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
+
+        self.currentFile = ""
 
         # 水平布局1
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -106,7 +108,7 @@ class Ui_MainWindow(object):
         # self.textEdit.setObjectName("textEdit")
         # self.horizontalLayout_2.addWidget(self.textEdit)
 
-        MainWindow.setCentralWidget(self.centralwidget)
+        self.MainWindow.setCentralWidget(self.centralwidget)
         # 菜单栏
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1049, 23))
@@ -115,16 +117,19 @@ class Ui_MainWindow(object):
         self.file.setObjectName("file")
         self.about = QtWidgets.QMenu(self.menubar)
         self.about.setObjectName("about")
-        MainWindow.setMenuBar(self.menubar)
+        self.MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+        self.MainWindow.setStatusBar(self.statusbar)
         self.save = QtWidgets.QAction(MainWindow)
         self.save.setObjectName("save")
+        self.saveAs = QtWidgets.QAction(MainWindow)
+        self.saveAs.setObjectName("saveAs")
         self.load = QtWidgets.QAction(MainWindow)
         self.load.setObjectName("load")
         self.file.addAction(self.load)
         self.file.addAction(self.save)
+        self.file.addAction(self.saveAs)
         self.menubar.addAction(self.file.menuAction())
         self.menubar.addAction(self.about.menuAction())
 
@@ -170,6 +175,8 @@ class Ui_MainWindow(object):
         self.file.setTitle(_translate("MainWindow", "文件"))
         self.about.setTitle(_translate("MainWindow", "关于"))
         self.save.setText(_translate("MainWindow", "保存"))
+        self.save.setShortcut('ctrl+s')
+        self.saveAs.setText(_translate("MainWindow", "另存为"))
         self.load.setText(_translate("MainWindow", "导入"))
 
     def addSignal(self, MainWindow):
@@ -374,11 +381,13 @@ class Ui_MainWindow(object):
         # 输出那个Qmenu对象被点击
         if q is self.save:
             logging.debug("Save Clicked")
-            self.io.save()
+            self.io.save(self.currentFile)
 
         elif q is self.load:
             logging.debug("Load Clicked")
-            self.io.load()
+            self.currentFile = self.io.load()
+            self.MainWindow.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", "文档分块管理" + " - " + self.currentFile.split("/")[-1]))
+
 
     def current_item_changed(self, current):
         # treeWidge 同步选中状态

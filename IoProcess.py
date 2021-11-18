@@ -14,7 +14,7 @@ class IoProcess(object):
         self.root = root
         print(columnDict)
 
-    def save(self):
+    def save(self, currentFile):
         # XML 结构
         # <item>
         #   <property></>
@@ -49,9 +49,12 @@ class IoProcess(object):
         xmlString = xml.dom.minidom.parseString(ET.tostring(rootNode, 'utf-8')).toprettyxml()
         logging.info(xmlString)
 
-        # 选择保存位置
-        cwd = os.getcwd()
-        file_name, filetype = QFileDialog.getSaveFileName(None, "创建文件", cwd, "Archive Files(*.xml)")
+        if currentFile:
+            file_name = currentFile
+        else:
+            # 选择保存位置
+            cwd = os.getcwd()
+            file_name, filetype = QFileDialog.getSaveFileName(None, "创建文件", cwd, "Archive Files(*.xml)")
 
         with open(file_name, 'wb') as f:
             f.write(xmlString.encode('utf-8'))
@@ -98,7 +101,8 @@ class IoProcess(object):
 
         depthTraversal(rootNode, self.root)
         self.root.setExpanded(1)
-        pass
+
+        return file_choose
 
     def getItemInfo(self, item):
         # {'itemName': 0, 'completeness': 1, 'isComplete': 2, 'time': 3}
